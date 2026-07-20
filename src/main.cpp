@@ -4,6 +4,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <cerrno>
+#include <unistd.h>
 
 #define BACKLOG 10
 
@@ -45,8 +46,24 @@ int main(){
     char buff[1000];
     if( recv(client_fd,buff,1000,0) < 0 ){
         std::cout << "Couldn't recive the data: " << strerror(errno) << std::endl;
+        return -1;
     }
     std::cout << buff << std::endl;
+
+
+    std::string response_body = "<html><h1>Olaf Brzoski</h1></html>\r\n";
+
+    
+    std::string status = "HTTP/1.1 200 OK\r\n";
+    int bytes = send(client_fd,status.c_str(),status.length(),0);
+
+    std::string header = "Content-type: text/html\r\nContent-length: "+std::to_string(response_body.length())+"\r\n\r\n";
+    bytes = send(client_fd,header.c_str(),header.length(),0);
+
+    bytes = send(client_fd,response_body.c_str(),response_body.length(),0);
+
+    close(client_fd);
+    close(sock_fd);
 
     return 0;
 }
