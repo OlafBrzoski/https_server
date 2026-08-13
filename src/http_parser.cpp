@@ -19,7 +19,7 @@ HttpRequest HttpParser::parse(const std::string& raw_request){
     
     start = end + 2;
     headers(raw_request, request, start, end);
-    body(raw_request, request, start, end);
+    body(raw_request, request, start);
 
     return request;
 }
@@ -53,7 +53,7 @@ void HttpParser::headers(const std::string& raw_request, HttpRequest& ans, size_
     }   
 }
 
-void HttpParser::body(const std::string& raw_request, HttpRequest& ans, size_t& start, size_t& end){
+void HttpParser::body(const std::string& raw_request, HttpRequest& ans, size_t& start ){
     if( start < raw_request.size() ){
         ans.body = raw_request.substr(start);
     }

@@ -15,5 +15,5 @@ class HttpParser{
         HttpRequest parse(const std::string& raw_request);
     private:
         void headers (const std::string& raw_request, HttpRequest& ans, size_t& start, size_t& end);
-        void body (const std::string& raw_request, HttpRequest& ans, size_t& start, size_t& end);
+        void body (const std::string& raw_request, HttpRequest& ans, size_t& start);
 };
