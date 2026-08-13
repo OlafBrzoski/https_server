@@ -7,7 +7,48 @@
 #include <unistd.h>
 
 #define BACKLOG 10
+// 1. Dołączamy nasz nowy kontrakt
+#include "http_parser.h"
 
+int main() {
+    // Symulacja tekstu, który normalnie odebrałbyś funkcją recv()
+    std::string raw_buffer =
+        "GET /index.html HTTP/1.1\r\n"
+        "Host: localhost:8080\r\n"
+        "User-Agent: Mozilla/5.0 (Linux x86_64)\r\n"
+        "Connection: keep-alive\r\n"
+        "\r\n";
+
+    // 2. Tworzymy instancję naszego parsera
+    HttpParser parser;
+
+    // 3. Wrzucamy surowy tekst i odbieramy posortowane szufladki
+    HttpRequest request = parser.parse(raw_buffer);
+
+    // --- TESTOWANIE WYNIKÓW ---
+
+    std::cout << "=== LINIA ŻĄDANIA ===\n";
+    std::cout << "Metoda:  " << request.method << "\n";
+    std::cout << "Ścieżka: " << request.path << "\n";
+    std::cout << "Wersja:  " << request.version << "\n\n";
+
+    std::cout << "=== NAGŁÓWKI ===\n";
+    // Nowoczesny sposób na przechodzenie przez std::map w C++
+    for (const auto& [key, value] : request.headers) {
+        std::cout << "[" << key << "]  ->  " << value << "\n";
+    }
+
+    std::cout << "\n=== CIAŁO (BODY) ===\n";
+    if (request.body.empty()) {
+        std::cout << "(puste)\n";
+    } else {
+        std::cout << request.body << "\n";
+    }
+
+    return 0;
+}
+
+/*
 int main(){
     struct sockaddr_storage client_addr;
     struct addrinfo hints, *res;
@@ -67,3 +108,4 @@ int main(){
 
     return 0;
 }
+*/
