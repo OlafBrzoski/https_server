@@ -1,12 +1,40 @@
-src/main
-*.out
-*.exe
-
-# Katalogi budowania 
+# =========================
+# Foldery budowania (CMake)
+# =========================
 build/
+build*/
 out/
 bin/
 
-# Pliki obiektowe
+# =========================
+# Pliki tymczasowe CMake 
+# =========================
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# =========================
+# Skompilowane pliki (C++)
+# =========================
 *.o
-*.obj
+*.out
+*.so
+*.a
+serwer
+
+# =========================
+# Edytory tekstu i IDE
+# =========================
+*.swp
+*.swo
+*.swn
+*~
+
+# =========================
+# Pliki systemowe OS
+# =========================
+.DS_Store
+Thumbs.db

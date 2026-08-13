@@ -5,6 +5,8 @@
 #include <string.h>
 #include <cerrno>
 #include <unistd.h>
+#include "http_parser.h"
+
 
 #define BACKLOG 10
 
@@ -24,46 +26,62 @@ int main(){
     sock_fd = socket(res->ai_family,res->ai_socktype,res->ai_protocol);
     if ( sock_fd < 0 ){
         std::cout << "Socket error: "<< strerror(errno) << std::endl;
+        freeaddrinfo(res);
         return -1;
     }
 
     if( bind(sock_fd,res->ai_addr,res->ai_addrlen) < 0){
         std::cout << "Binding error: " << strerror(errno) << std::endl;
+        freeaddrinfo(res);
         return -1;
     }
+    freeaddrinfo(res);
 
     if( listen(sock_fd,BACKLOG) < 0 ){
         std::cout << "Listening error: " << strerror(errno) << std::endl;
         return -1;
     }
     
-    addr_size = sizeof(client_addr);
-    client_fd = accept(sock_fd,(struct sockaddr *)&client_addr,&addr_size);
-    if( client_fd < 0 ){
-        std::cout << "Couldn't accept: " << strerror(errno) << std::endl;
+    while ( true ) {
+        addr_size = sizeof(client_addr);
+        client_fd = accept(sock_fd,(struct sockaddr *)&client_addr,&addr_size);
+        if( client_fd < 0 ){
+            std::cout << "Couldn't accept: " << strerror(errno) << std::endl;
+            continue;
+        }
+        
+        char buff[1000];
+        int bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0); 
+        if( bytes_read <= 0 ){
+            std::cout << "Couldn't recive the data: " << strerror(errno) << std::endl;
+            close(client_fd);
+            continue;
+        } 
+
+        buff[bytes_read] = '\0';
+        std::string incoming_request(buff);
+
+        HttpParser parser;
+        HttpRequest request = parser.parse(incoming_request);
+
+        std::cout << "Client requested: " << request.path << " with method: " << request.method << std::endl; 
+
+        std::string response_body = "<html><h1>Olaf Brzoski</h1></html>\r\n";
+
+        
+        std::string status = "HTTP/1.1 200 OK\r\n";
+        send(client_fd,status.c_str(),status.length(),0);
+
+        std::string header = "Content-type: text/html\r\nContent-length: "+std::to_string(response_body.length())+"\r\n\r\n";
+        send(client_fd,header.c_str(),header.length(),0);
+
+        send(client_fd,response_body.c_str(),response_body.length(),0);
+
+        close(client_fd);
     }
-    
-    char buff[1000];
-    if( recv(client_fd,buff,1000,0) < 0 ){
-        std::cout << "Couldn't recive the data: " << strerror(errno) << std::endl;
-        return -1;
-    }
-    std::cout << buff << std::endl;
 
-
-    std::string response_body = "<html><h1>Olaf Brzoski</h1></html>\r\n";
-
-    
-    std::string status = "HTTP/1.1 200 OK\r\n";
-    int bytes = send(client_fd,status.c_str(),status.length(),0);
-
-    std::string header = "Content-type: text/html\r\nContent-length: "+std::to_string(response_body.length())+"\r\n\r\n";
-    bytes = send(client_fd,header.c_str(),header.length(),0);
-
-    bytes = send(client_fd,response_body.c_str(),response_body.length(),0);
-
-    close(client_fd);
     close(sock_fd);
 
     return 0;
 }
+
