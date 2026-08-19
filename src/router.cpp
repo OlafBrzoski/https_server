@@ -8,6 +8,18 @@ std::string build_response(const HttpRequest& request){
     std::string response = "HTTP/1.1";
     std::string path = "../public";
     std::string error_body = "<html><body><h1>404 - This page does not exist</h1></body></html>";
+    std::string error_body_req = "<html><body><h1>400 - Bad request</h1></body></html>";
+
+
+    if ( request.method.empty() ){
+        response += " 400 Bad Request\r\n";
+        response += "Content-Type: text/html\r\n";
+        response += "Content-Length: " + std::to_string(error_body_req.length()) + "\r\n";
+        response += "Connection: close\r\n";
+        response += "\r\n";
+        response += error_body_req;
+        return response;
+    }
 
     if ( request.method == "GET" ){
 
