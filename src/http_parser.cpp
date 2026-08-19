@@ -4,29 +4,48 @@
 
 HttpRequest HttpParser::parse(const std::string& raw_request){
     HttpRequest request;
-
+    bool fault = false;
+    
     size_t start = 0;
     size_t end = raw_request.find(" ");
+    if ( end == std::string::npos ){
+        return {};
+    }
     request.method = raw_request.substr(start,end-start);
 
     start = end + 1;
     end = raw_request.find(" ",start);
+    if ( end == std::string::npos ){
+        return {};
+    }
     request.path = raw_request.substr(start,end-start);
 
     start = end + 1;
     end = raw_request.find("\r\n",start);
+    if ( end == std::string::npos ){
+        return {};
+    }
     request.version = raw_request.substr(start,end-start);
     
     start = end + 2;
-    headers(raw_request, request, start, end);
+    headers(raw_request, request, start, end, fault);
+    if ( fault ){
+        return {};
+    }
+
     body(raw_request, request, start);
+
 
     return request;
 }
 
-void HttpParser::headers(const std::string& raw_request, HttpRequest& ans, size_t& start, size_t& end){
+void HttpParser::headers(const std::string& raw_request, HttpRequest& ans, size_t& start, size_t& end, bool& fault){
     while( true ){
         size_t line_end = raw_request.find("\r\n",start);
+        if ( line_end == std::string::npos ){
+            fault = true;
+            break;
+        }
         if ( start == line_end ){
                 start = line_end + 2;
                 break;
