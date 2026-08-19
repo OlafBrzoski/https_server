@@ -11,9 +11,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 add_executable(serwer 
     src/main.cpp 
     src/http_parser.cpp
+    src/router.cpp
 )
 
 target_include_directories(serwer PRIVATE include)
+
 
 # --- KONFIGURACJA TESTÓW ---
 include(FetchContent)
@@ -25,7 +27,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-add_executable(run_tests tests/test_parser.cpp src/http_parser.cpp)
-
+add_executable(run_tests 
+    tests/test_parser.cpp 
+    tests/test_router.cpp 
+    src/http_parser.cpp 
+    src/router.cpp
+)
 target_link_libraries(run_tests GTest::gtest_main)
 target_include_directories(run_tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
+

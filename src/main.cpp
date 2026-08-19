@@ -6,6 +6,7 @@
 #include <cerrno>
 #include <unistd.h>
 #include "http_parser.h"
+#include "router.h"
 
 
 #define BACKLOG 10
@@ -65,17 +66,10 @@ int main(){
         HttpRequest request = parser.parse(incoming_request);
 
         std::cout << "Client requested: " << request.path << " with method: " << request.method << std::endl; 
-
-        std::string response_body = "<html><h1>Olaf Brzoski</h1></html>\r\n";
-
         
-        std::string status = "HTTP/1.1 200 OK\r\n";
-        send(client_fd,status.c_str(),status.length(),0);
+        std::string full_response = build_response(request);
 
-        std::string header = "Content-type: text/html\r\nContent-length: "+std::to_string(response_body.length())+"\r\n\r\n";
-        send(client_fd,header.c_str(),header.length(),0);
-
-        send(client_fd,response_body.c_str(),response_body.length(),0);
+        send(client_fd,full_response.c_str(),full_response.length(),0);
 
         close(client_fd);
     }
