@@ -1,0 +1,34 @@
+#Created with the help of AI 
+name: C++ CI Test Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Pobranie kodu repozytorium
+      uses: actions/checkout@v4
+
+    - name: Instalacja kompilatora i CMake
+      run: sudo apt-get update && sudo apt-get install -y cmake g++
+
+    - name: Tworzenie folderu build
+      run: mkdir build
+
+    - name: Konfiguracja CMake
+      working-directory: ./build
+      run: cmake ..
+
+    - name: Budowanie projektu (Make)
+      working-directory: ./build
+      run: make
+
+    - name: Uruchomienie testow GTest
+      working-directory: ./build
+      run: ./run_tests
