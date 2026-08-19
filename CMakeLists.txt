@@ -14,3 +14,18 @@ add_executable(serwer
 )
 
 target_include_directories(serwer PRIVATE include)
+
+# --- KONFIGURACJA TESTÓW ---
+include(FetchContent)
+
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
+
+add_executable(run_tests tests/test_parser.cpp src/http_parser.cpp)
+
+target_link_libraries(run_tests GTest::gtest_main)
+target_include_directories(run_tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
